@@ -1,6 +1,6 @@
 defaults:
-  - datasets: airfoil
-  - model: airfoil
+  - datasets: deforming_plate
+  - model: deforming_plate
   - opt: default
   - _self_
   - override hydra/hydra_logging: none

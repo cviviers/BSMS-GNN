@@ -64,8 +64,9 @@ def convert_tfrecord_to_h5(tf_dataset_path, save_root, data_keys):
 
 @hydra.main(version_base=None, config_path="../configs/", config_name="default")
 def main(cfg: DictConfig):
-    tf_dataset_path = os.path.join(cfg.datasets.tf_dataset_dir, cfg.datasets.tf_dataset_name)
-    save_root = os.path.join(cfg.datasets.root, cfg.datasets.tf_dataset_name)
+    tf_dataset_path = r"/app/code/BSMS-GNN/data/deforming_plate"
+    
+    save_root = r"/app/code/BSMS-GNN/data/converted_plate"
     data_keys = cfg.datasets.field_names
 
     convert_tfrecord_to_h5(tf_dataset_path, save_root, data_keys)
