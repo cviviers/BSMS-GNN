@@ -4,7 +4,8 @@ CONFIG_FILE="${2-./configs/$CASE/}"
 # 0: train 1: local test 2: global
 MODE="${3-0}"
 RESTART_EPOCH="${4--1}"
-
+DATA_DIR="${5-./data/$CASE/}"
+DUMP_DIR="${6-./res/$CASE/}"
 if [ ! -f "$CONFIG_FILE" ]; then
     echo "No config file for ${CASE} in configs folder"
     exit 128
@@ -20,7 +21,7 @@ run(){
     -num_epochs $num_epochs -batch $batch -lr $lr -gamma $gamma \
     -restart_epoch $RESTART_EPOCH \
     -mp_time $MP_time\
-    -data_dir $data_dir -dump_dir $dump_dir -mode $MODE
+    -data_dir $DATA_DIR -dump_dir $DUMP_DIR -mode $MODE
 }
 
 run

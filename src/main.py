@@ -42,6 +42,8 @@ def getargs():
     parser.add_argument('-restart_epoch', type=int, default=-1, help='restart checkpoint epoch')
 
     args, _ = parser.parse_known_args()
+    args.data_dir = os.path.join(args.data_dir)
+    print('data_dir:', args.data_dir)
     return args
 
 
