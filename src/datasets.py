@@ -55,6 +55,8 @@ class MeshGeneralDataset(Dataset):
         # read all features indicated in meta
         with open(os.path.join(root, 'meta.json'), 'r') as fp:
             self.meta = json.loads(fp.read())
+
+        print('Got meta from:', os.path.join(root, 'meta.json'))
         field_names = self.meta['field_names']
         fields = dict()
         with h5py.File(os.path.join(self.data_dir, str(instance_id) + '.h5'), 'r') as f:
@@ -98,6 +100,9 @@ class MeshGeneralDataset(Dataset):
 
     def _read_normalization_info(self, in_normal_feature_list, out_normal_feature_list, roll_normal_feature_list):
         # collect in normalization
+        print('in_normal_feature_list:', in_normal_feature_list)
+        print('out_normal_feature_list:', out_normal_feature_list)
+        print('roll_normal_feature_list:', roll_normal_feature_list)
         for i, fea in enumerate(in_normal_feature_list):
             temp_std = torch.tensor(self.meta['normalization_info'][fea]['std'], dtype=torch.float)
             temp_mean = torch.tensor(self.meta['normalization_info'][fea]['mean'], dtype=torch.float)
