@@ -52,6 +52,7 @@ def _adj_list_to_flat_edge(adj_list):
 
 
 def _adj_mat_to_flat_edge(adj_mat):
+    # print adj_mat type
     if isinstance(adj_mat, np.ndarray):
         s, r = np.where(adj_mat.astype(bool))
     elif isinstance(adj_mat, scipy.sparse.coo_array):
@@ -60,6 +61,12 @@ def _adj_mat_to_flat_edge(adj_mat):
         valid = np.where(dat.astype(bool))[0]
         s, r = s[valid], r[valid]
     elif isinstance(adj_mat, scipy.sparse.csr_matrix):
+        adj_mat = scipy.sparse.coo_array(adj_mat)
+        s, r = adj_mat.row, adj_mat.col
+        dat = adj_mat.data
+        valid = np.where(dat.astype(bool))[0]
+        s, r = s[valid], r[valid]
+    elif isinstance(adj_mat, scipy.sparse._csr.csr_array):
         adj_mat = scipy.sparse.coo_array(adj_mat)
         s, r = adj_mat.row, adj_mat.col
         dat = adj_mat.data
