@@ -11,5 +11,5 @@ num_epochs=50
 batch=12
 lr=0.0001
 gamma=0.79432823472
-data_dir='/elec003.mnt/project/elec-vca-tasti/chris/bsms_data/plate'
+data_dir='/project/elec-vca-tasti/chris/bsms_data/plate'
 dump_dir='./res/plate'
