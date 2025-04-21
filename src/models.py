@@ -132,10 +132,12 @@ class Airfoil(ModelGeneral):
 
 class Plate(ModelGeneral):
     def __init__(self, pos_dim, ld, layer_num, mlp_hidden_layer, MP_times):
-        # in: d_x(used for driven nodes only),type
-        # out: d_x
-        in_dim = 1 + pos_dim
-        out_dim = pos_dim
+        # in: d_x(used for driven nodes only),stress, type
+        # out: d_x, stress
+        # NOTE: stress is not used in the paper, but it is used in the code for the sake of consistency
+        in_dim = pos_dim +1 +1
+        out_dim = pos_dim +1
+        pos_dim = pos_dim + 1  # stress is not used in the paper, but it is used in the code for the sake of consistency
         MP_model = ContactGMP
         super(Plate, self).__init__(pos_dim, in_dim, out_dim, ld, layer_num, mlp_hidden_layer, MP_times, lagrangian=True, MP_model=MP_model, edge_set_num=2, has_contact=True)
 

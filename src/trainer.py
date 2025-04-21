@@ -9,7 +9,7 @@ import random
 import numpy as np
 from helpers_merge import merge_mids, merge_mgs
 import os
-
+import wandb
 
 class Trainer:
     def __init__(self, args, device):
@@ -42,6 +42,9 @@ class Trainer:
         else:
             raise NotImplementedError("A Case not wrapped yet")
         self.model = self.model_class(pos_dim=self.args.space_dim, ld=self.args.hidden_dim, layer_num=self.args.multi_mesh_layer, mlp_hidden_layer=self.args.hidden_depth, MP_times=self.args.mp_time)
+        print('model:', self.model)
+        # wandb
+        wandb.watch(self.model, log="all")
 
         POST_FIX_1 = '_layernum_' + str(self.args.multi_mesh_layer)
         POST_FIX_2 = POST_FIX_1 + '_MPHIDDENLAYER_' + str(self.args.hidden_depth) + '_MPHIDDENTDIM_' + str(self.args.hidden_dim) + '_MPtime_' + str(self.args.mp_time) + '_NoiseLevel_' + str(
@@ -131,6 +134,8 @@ class Trainer:
         # to avoid messy writer, store RMSE 1st in an array
         rmse_array = np.zeros(len(instance_list))
         for i in range(len(instance_list)):
+            # log learning rate
+            wandb.log({"lr": self.optimizer.param_groups[0]['lr']})
             id = instance_list[i]
             mdata = self._create_datset_offline(id, mode=mode)
             mean_loss = 0
@@ -153,11 +158,19 @@ class Trainer:
                 count_insts += count
                 mean_loss /= count
                 rmse_array[id] = math.sqrt(mean_loss)
+                if mode != 'train':
+                    wandb.log({f'Eval RMSE/{mode}/Epoch: {epoch}': rmse_array[id]})
+                else:
+                    wandb.log({f'Train RMSE/{mode}/Epoch: {epoch}': rmse_array[id]})
             # safety clean
             del mdata
         # write sequentially afterwards
         for i in range(len(instance_list)):
             self.writer.add_scalar(f'Inst RMSE/{mode}/Epoch: {epoch}', rmse_array[i], i)
+            # if mode != 'train':
+            #     wandb.log({f'Eval RMSE/{mode}/Epoch: {epoch}': rmse_array[i]})
+            # else:
+            #     wandb.log({f'Train RMSE/{mode}/Epoch: {epoch}': rmse_array[i]})
         # stats
         mean_loss_insts /= count_insts
         if mode == 'train':

@@ -82,6 +82,7 @@ class MeshGeneralDataset(Dataset):
         self.strided_idx = list(range(0, fields["mesh_pos"].shape[0], stride))
         self.L = len(self.strided_idx) - 1
         for name in field_names:
+            # print(name, fields[name].shape)
             fields[name] = fields[name][self.strided_idx]
         # re-cal multi level mesh?
         self._cal_multi_mesh(fields)
@@ -100,10 +101,11 @@ class MeshGeneralDataset(Dataset):
 
     def _read_normalization_info(self, in_normal_feature_list, out_normal_feature_list, roll_normal_feature_list):
         # collect in normalization
-        print('in_normal_feature_list:', in_normal_feature_list)
-        print('out_normal_feature_list:', out_normal_feature_list)
-        print('roll_normal_feature_list:', roll_normal_feature_list)
+        # print('in_normal_feature_list:', in_normal_feature_list)
+        # print('out_normal_feature_list:', out_normal_feature_list)
+        # print('roll_normal_feature_list:', roll_normal_feature_list)
         for i, fea in enumerate(in_normal_feature_list):
+            # print('in_fea:', fea)
             temp_std = torch.tensor(self.meta['normalization_info'][fea]['std'], dtype=torch.float)
             temp_mean = torch.tensor(self.meta['normalization_info'][fea]['mean'], dtype=torch.float)
             if i == 0:
@@ -114,6 +116,7 @@ class MeshGeneralDataset(Dataset):
                 self.mean_in = torch.cat((self.mean_in, temp_mean), dim=-1)
         # collect out normalization
         for i, fea in enumerate(out_normal_feature_list):
+            # print('out_fea:', fea)
             temp_std = torch.tensor(self.meta['normalization_info'][fea]['std'], dtype=torch.float)
             temp_mean = torch.tensor(self.meta['normalization_info'][fea]['mean'], dtype=torch.float)
             if i == 0:
@@ -125,6 +128,7 @@ class MeshGeneralDataset(Dataset):
         # collect roll-out normalization
         self.roll_l = 0
         for i, fea in enumerate(roll_normal_feature_list):
+            # print('roll_fea:', fea)
             temp_std = torch.tensor(self.meta['normalization_info'][fea]['std'], dtype=torch.float)
             self.roll_l += temp_std.shape[-1]
         # NOTE assume/let all leading features align with the list ordering here
@@ -134,6 +138,15 @@ class MeshGeneralDataset(Dataset):
     def _normalize(self, t_in, t_out):
         x_in = t_in.clone()
         x_out = t_out.clone()
+        # print('x_in:', x_in.shape)
+        # print('x_out:', x_out.shape)
+        # print('self.in_norm_l:', self.in_norm_l)
+        # print('self.out_norm_l:', self.out_norm_l)
+        # print('self.roll_l:', self.roll_l)
+        # print('self.std_in:', self.std_in.shape)
+        # print('self.std_out:', self.std_out.shape)
+        # print('self.mean_in:', self.mean_in.shape)
+        # print('self.mean_out:', self.mean_out.shape)
         x_in[..., :self.in_norm_l] = (x_in[..., :self.in_norm_l] - self.mean_in) / self.std_in
         x_out[..., :self.out_norm_l] = (x_out[..., :self.out_norm_l] - self.mean_out) / self.std_out
         return x_in, x_out
@@ -387,7 +400,7 @@ class MeshAirfoilDataset(MeshGeneralDataset):
 
 class MeshPlateDataset(MeshGeneralDataset):
     def __init__(self, root, instance_id, layer_num, stride, mode='train', noise_shuffle=False, noise_level=None, noise_gamma=1.0, recal_mesh=False, consist_mesh=False):
-        in_normal_feature_list, out_normal_feature_list, roll_normal_feature_list = ['world_pos', 'mesh_pos'], ['world_pos'], ['world_pos']
+        in_normal_feature_list, out_normal_feature_list, roll_normal_feature_list = ['world_pos', 'mesh_pos', 'stress'], ['world_pos', 'stress'], ['world_pos', 'stress']
         super().__init__(root,
                          in_normal_feature_list,
                          out_normal_feature_list,
@@ -425,8 +438,12 @@ class MeshPlateDataset(MeshGeneralDataset):
             noise = torch.where(no_noise_node, torch.zeros_like(noise), noise)
             node_info_inp += noise
             node_info_tar += (1.0 - self.noise_gamma) * noise
+        
+        node_info_inp = torch.cat((node_info_inp, fields["mesh_pos"][:-1], fields["stress"][:-1], fields["node_type"][:-1]), dim=-1)
+        node_info_tar = torch.cat((node_info_tar, fields["stress"][1:]), dim=-1)
 
-        node_info_inp = torch.cat((node_info_inp, fields["mesh_pos"][:-1], fields["node_type"][:-1]), dim=-1)
+        # print(node_info_inp.shape, node_info_tar.shape)
+
         return node_info_inp, node_info_tar
 
     def get(self, idx):

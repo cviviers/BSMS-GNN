@@ -3,7 +3,8 @@ from trainer import Trainer
 import torch
 import os
 from enum import Enum
-
+import wandb
+import json
 
 class MODE(Enum):
     Train = 0
@@ -53,6 +54,12 @@ if __name__ == "__main__":
     args.dump_dir = os.path.join(args.dump_dir, 'ours')
     print(args)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    # Set up wandb
+    wandb.init(project="BSMS-GNN", config=args)
+
+    
+
     trainer = Trainer(args, device)
     if MODE(args.mode) == MODE.Train:
         print('Train')
