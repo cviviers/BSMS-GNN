@@ -54,11 +54,11 @@ if __name__ == "__main__":
     args.dump_dir = os.path.join(args.dump_dir, 'ours')
     print(args)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
+    print('device:', device)
     # Set up wandb
     wandb.init(project="BSMS-GNN", config=args)
 
-    
+
 
     trainer = Trainer(args, device)
     if MODE(args.mode) == MODE.Train:

@@ -56,7 +56,7 @@ class MeshGeneralDataset(Dataset):
         with open(os.path.join(root, 'meta.json'), 'r') as fp:
             self.meta = json.loads(fp.read())
 
-        print('Got meta from:', os.path.join(root, 'meta.json'))
+        # print('Got meta from:', os.path.join(root, 'meta.json'))
         field_names = self.meta['field_names']
         fields = dict()
         with h5py.File(os.path.join(self.data_dir, str(instance_id) + '.h5'), 'r') as f:
