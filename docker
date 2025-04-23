@@ -1,0 +1,45 @@
+# Use the official CUDA image with Ubuntu 22.04 and CUDA 12.1.1
+# FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
+FROM nvcr.io/nvidia/pytorch:24.12-py3
+# Set environment variables for non-interactive installation
+# ENV DEBIAN_FRONTEND=noninteractive
+
+# # Install necessary system dependencies
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#     python3-pip \
+#     python3-dev \
+#     build-essential \
+#     git \
+#     curl \
+#     && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip to the latest version
+RUN python3 -m pip install --upgrade pip
+
+# Install Python packages
+# RUN pip install \
+#     torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu121
+    
+
+RUN pip install \
+    torch_geometric \
+    torch_scatter \
+    torch_sparse -f https://data.pyg.org/whl/torch-2.1.0+cu121.html \
+    black \ 
+    sparse-dot-mkl \
+    torchdata \
+    hydra-core \ 
+    pytz \
+    torchsummary \
+    h5py \
+    mkl \
+    tabulate \
+    tensorboard \
+    wandb \ 
+    absl-py \
+    matplotlib\
+    numpy==1.26.4\
+    scipy==1.14.0 \
+    tfrecord==1.14.4 
+# Set the default command to python3
+CMD ["python3"]

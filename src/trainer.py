@@ -44,7 +44,7 @@ class Trainer:
         self.model = self.model_class(pos_dim=self.args.space_dim, ld=self.args.hidden_dim, layer_num=self.args.multi_mesh_layer, mlp_hidden_layer=self.args.hidden_depth, MP_times=self.args.mp_time)
         print('model:', self.model)
         # wandb
-        wandb.watch(self.model, log="all")
+        
 
         POST_FIX_1 = '_layernum_' + str(self.args.multi_mesh_layer)
         POST_FIX_2 = POST_FIX_1 + '_MPHIDDENLAYER_' + str(self.args.hidden_depth) + '_MPHIDDENTDIM_' + str(self.args.hidden_dim) + '_MPtime_' + str(self.args.mp_time) + '_NoiseLevel_' + str(
@@ -61,6 +61,8 @@ class Trainer:
             self.current_epoch = 0
 
         self.model = self.model.to(self.device)
+
+        wandb.watch(self.model, log="all")
 
     def _preproc_multi_infos(self, mdata, b_data):
         # process the multi-level mesh for batched data here
