@@ -61,15 +61,15 @@ class ModelGeneral(torch.nn.Module):
         out = self._update_states(node_in, node_tar, node_type, out)
         # masking: e.g. 1st kind bc, scripted bc
         out, mask = self._mask(node_in, node_tar, node_type, out)
-        print("out shape:", out.shape)
-        print("mask shape:", mask.shape)
-        print("node_tar shape:", node_tar.shape)
+        # print("out shape:", out.shape)
+        # print("mask shape:", mask.shape)
+        # print("node_tar shape:", node_tar.shape)
         # error cal
-        loss = self.mse(out[:, :3], node_tar[:, :3])
+        loss = self.mse(out[:, :, :3], node_tar[:, :, :3])
         wandb.log({"pos loss": loss.mean()})  # log the loss to wandb
         # stress cal
         if self.pos_dim == 3:
-            loss_stress = self.stress_mse(out[:, 3:], node_tar[:, 3:])
+            loss_stress = self.stress_mse(out[:, :, 3:], node_tar[:, :, 3:])
             loss = torch.cat((loss, loss_stress), dim=-1)
             wandb.log({"stress loss": loss_stress.mean()})  # log the stress loss to wandb
 
