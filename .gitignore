@@ -136,3 +136,5 @@ src/runs/*
 *events*
 
 wandb/
+
+res/

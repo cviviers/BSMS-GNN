@@ -12,6 +12,7 @@ class ModelGeneral(torch.nn.Module):
         self.MP_times = MP_times
         self.pos_dim = pos_dim
         self.mse = torch.nn.MSELoss(reduction='none')
+        self.stress_mse = torch.nn.MSELoss(reduction='none')
 
     def _get_nodal_latent_input(self, node_in):
         # NOTE implement in childs
@@ -61,7 +62,11 @@ class ModelGeneral(torch.nn.Module):
         # masking: e.g. 1st kind bc, scripted bc
         out, mask = self._mask(node_in, node_tar, node_type, out)
         # error cal
-        loss = self.mse(out, node_tar)
+        loss = self.mse(out[:, :3], node_tar[:, :3])
+        # stress cal
+        if self.pos_dim == 3:
+            loss_stress = self.stress_mse(out[:, 3:], node_tar[:, 3:])
+            loss = torch.cat((loss, loss_stress), dim=-1)
         if pen_coeff != None:
             loss = self._penalize(loss, pen_coeff)
         loss = (loss * mask).sum()

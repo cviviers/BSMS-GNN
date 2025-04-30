@@ -10,6 +10,7 @@ import numpy as np
 from helpers_merge import merge_mids, merge_mgs
 import os
 import wandb
+import h5py
 
 class Trainer:
     def __init__(self, args, device):
@@ -161,18 +162,15 @@ class Trainer:
                 mean_loss /= count
                 rmse_array[id] = math.sqrt(mean_loss)
                 if mode != 'train':
-                    wandb.log({f'Eval RMSE/{mode}/Epoch: {epoch}': rmse_array[id]})
+                    wandb.log({f'Eval RMSE/{mode}': rmse_array[id]})
                 else:
-                    wandb.log({f'Train RMSE/{mode}/Epoch: {epoch}': rmse_array[id]})
+                    wandb.log({f'Train RMSE/{mode}': rmse_array[id]})
             # safety clean
             del mdata
         # write sequentially afterwards
         for i in range(len(instance_list)):
             self.writer.add_scalar(f'Inst RMSE/{mode}/Epoch: {epoch}', rmse_array[i], i)
-            # if mode != 'train':
-            #     wandb.log({f'Eval RMSE/{mode}/Epoch: {epoch}': rmse_array[i]})
-            # else:
-            #     wandb.log({f'Train RMSE/{mode}/Epoch: {epoch}': rmse_array[i]})
+
         # stats
         mean_loss_insts /= count_insts
         if mode == 'train':
@@ -221,6 +219,9 @@ class Trainer:
                 mdata = self._create_datset_offline(id, mode='test')
                 L = mdata.in_feature.shape[0]
                 instance_rollout_error = np.zeros(L)
+                print(mdata.in_feature.shape)
+                predictions = np.zeros((L, mdata.in_feature.shape[1], 4))
+
                 for id_batch, b_data in enumerate(DataLoader(mdata, batch_size=1, shuffle=False)):
                     _, n, _ = mdata.in_feature.shape
                     m_ids = mdata.m_idx
@@ -235,12 +236,20 @@ class Trainer:
                         current_stat = b_data.x.reshape(1, n, -1).to(self.device)
                     b_data.y = b_data.y.reshape(1, n, -1).to(self.device)
                     loss, out, _ = self.model(m_ids, m_gs, current_stat, b_data.y, pen_coeff)
+                    print('out shape:', out.shape)
                     # record global error
                     instance_rollout_error[id_batch] = math.sqrt(loss.item())
                     # push forward state
                     current_stat = mdata._push_forward(out, current_stat)
 
+                    # record prediction
+                    predictions[id_batch] = out[0].cpu().numpy()
+
                 dir = os.path.join(self.args.dump_dir, 'rollout_RMSE_epoch_' + str(self.args.restart_epoch))
                 os.makedirs(dir, exist_ok=True)
                 dump_path = os.path.join(dir, str(id) + '.csv')
                 np.savetxt(dump_path, instance_rollout_error, delimiter=',')
+                # store predictions to h5 file
+                dump_path = os.path.join(dir, str(id) + '.h5')
+                with h5py.File(dump_path, 'w') as f:
+                    f.create_dataset('predictions', data=predictions)
