@@ -1,7 +1,7 @@
 import torch
 from ops import GMP, MLP, ContactGMP
 from BSMS import BSGMP
-
+import wandb
 
 class ModelGeneral(torch.nn.Module):
     def __init__(self, pos_dim, in_dim, out_dim, ld, layer_num, mlp_hidden_layer, MP_times, lagrangian, MP_model, edge_set_num, has_contact):
@@ -63,10 +63,13 @@ class ModelGeneral(torch.nn.Module):
         out, mask = self._mask(node_in, node_tar, node_type, out)
         # error cal
         loss = self.mse(out[:, :3], node_tar[:, :3])
+        wandb.log({"pos loss": loss.mean()})  # log the loss to wandb
         # stress cal
         if self.pos_dim == 3:
             loss_stress = self.stress_mse(out[:, 3:], node_tar[:, 3:])
             loss = torch.cat((loss, loss_stress), dim=-1)
+            wandb.log({"stress loss": loss_stress.mean()})  # log the stress loss to wandb
+
         if pen_coeff != None:
             loss = self._penalize(loss, pen_coeff)
         loss = (loss * mask).sum()
