@@ -68,10 +68,10 @@ class ModelGeneral(torch.nn.Module):
         loss = self.mse(out[:, :, :3], node_tar[:, :, :3])
         wandb.log({"pos loss": loss.mean()})  # log the loss to wandb
         # stress cal
-        if self.pos_dim == 3:
-            loss_stress = self.stress_mse(out[:, :, 3:], node_tar[:, :, 3:])
-            loss = torch.cat((loss, loss_stress), dim=-1)
-            wandb.log({"stress loss": loss_stress.mean()})  # log the stress loss to wandb
+        # if self.pos_dim == 3:
+        loss_stress = self.stress_mse(out[:, :, 3:], node_tar[:, :, 3:])
+        loss = torch.cat((loss, loss_stress), dim=-1)
+        wandb.log({"stress loss": loss_stress.mean()})  # log the stress loss to wandb
 
         if pen_coeff != None:
             loss = self._penalize(loss, pen_coeff)
