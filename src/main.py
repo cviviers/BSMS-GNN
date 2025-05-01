@@ -58,7 +58,13 @@ if __name__ == "__main__":
     # Set up wandb
     wandb.init(project="BSMS-GNN", config=args)
 
-
+    # get wandb name
+    wandb_name = wandb.run.name
+    # add to dump_dir
+    args.dump_dir = os.path.join(args.dump_dir, wandb_name)
+    # create dump_dir if not exist
+    if not os.path.exists(args.dump_dir):
+        os.makedirs(args.dump_dir)
 
     trainer = Trainer(args, device)
     if MODE(args.mode) == MODE.Train:

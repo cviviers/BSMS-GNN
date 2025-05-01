@@ -18,7 +18,12 @@ class Trainer:
         self.device = device
         self._create_model()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.lr)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=self.args.gamma)
+
+        # use onecyle if you want to use onecyle
+        if args.scheduler == 'onecycle':
+            self.scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer, max_lr=self.args.lr, steps_per_epoch=self.args.n_train, epochs=self.args.num_epochs, anneal_strategy='linear', cycle_momentum=False)
+        else:
+            self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=self.args.gamma)
         self.writer = SummaryWriter(os.path.join(self.args.dump_dir, 'log'))
         self.pbar = tqdm(range(self.current_epoch, self.args.num_epochs), unit="iters")
 
