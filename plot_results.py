@@ -59,7 +59,10 @@ def plot_tensor_sample(data, prediction, sample_idx, cmap='viridis', s=20):
     ax2.set_zlabel('Z-axis')
     plt.colorbar(sc2, ax=ax2, label='Color Scale')
     plt.tight_layout()
-    plt.show()
+    # plt.show()
+    # save the figure
+    save_path = os.path.join(os.getcwd(), f'sample_{sample_idx}.png')
+    plt.savefig(save_path)
     
 
 
@@ -69,23 +72,24 @@ if __name__ == '__main__':
     # Here we'll use random numbers for demonstration.
 
     # read file h5
-    index = 200
-    path = r"C:\Users\20195435\Documents\TUe\Tasti\Solvey\code\BSMS-GNN\data\plate\outputs_test\0.h5"
-    with h5py.File(path, 'r') as f:
-        print(list(f.keys()))
-        pos = f['world_pos'][:]
-        stress = f['stress'][:]
-        print(pos.shape, stress.shape)
-        data = np.concatenate((pos, stress), axis=2)
+    for index in range(200):
+    # index = 0
+        path = r"C:\Users\20195435\Documents\TUe\Tasti\Solvey\code\BSMS-GNN\data\plate\outputs_test\0.h5"
+        with h5py.File(path, 'r') as f:
+            print(list(f.keys()))
+            pos = f['world_pos'][:]
+            stress = f['stress'][:]
+            print(pos.shape, stress.shape)
+            data = np.concatenate((pos, stress), axis=2)
 
-    # plot_tensor_sample(data, sample_idx=index)
+        # plot_tensor_sample(data, sample_idx=index)
 
-    # Or if you prefer PyTorch:
-    # dummy = torch.rand(400, 1000, 4)
-    path = r"C:\Users\20195435\Documents\TUe\Tasti\Solvey\code\BSMS-GNN\res\gentle-waterfall-52\ours\rollout_RMSE_epoch_24\0.h5"
-    with h5py.File(path, 'r') as f:
-        print(list(f.keys()))
-        predicton = f['predictions'][:]
-    print(predicton.shape)  # Check the shape of the data
-    # Plot sample #42
-    plot_tensor_sample(data, predicton, sample_idx=index)
+        # Or if you prefer PyTorch:
+        # dummy = torch.rand(400, 1000, 4)
+        path = r"C:\Users\20195435\Documents\TUe\Tasti\Solvey\code\BSMS-GNN\res\cool-lion-56\ours\rollout_RMSE_epoch_20\0.h5"
+        with h5py.File(path, 'r') as f:
+            print(list(f.keys()))
+            predicton = f['predictions'][:]
+        print(predicton.shape)  # Check the shape of the data
+        # Plot sample #42
+        plot_tensor_sample(data, predicton, sample_idx=index)

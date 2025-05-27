@@ -38,6 +38,7 @@ def getargs():
     parser.add_argument('-num_epochs', type=int, default=20, help='epochs')
     parser.add_argument('-batch', type=int, default=1, help='batch size')
     parser.add_argument('-lr', type=float, default=1e-4, help='learning rate')
+    parser.add_argument('-scheduler', type=str, default='cosine', help='learning rate scheduler')
     parser.add_argument('-gamma', type=float, default=0.93, help='decary rate')
 
     parser.add_argument('-restart_epoch', type=int, default=-1, help='restart checkpoint epoch')
@@ -58,17 +59,23 @@ if __name__ == "__main__":
     # Set up wandb
     wandb.init(project="BSMS-GNN", config=args)
 
-    # get wandb name
-    wandb_name = wandb.run.name
-    # add to dump_dir
-    args.dump_dir = os.path.join(args.dump_dir, wandb_name)
-    # create dump_dir if not exist
-    if not os.path.exists(args.dump_dir):
-        os.makedirs(args.dump_dir)
-
     trainer = Trainer(args, device)
     if MODE(args.mode) == MODE.Train:
         print('Train')
+
+        
+
+        # get wandb name
+        wandb_name = wandb.run.name
+        # add to dump_dir
+        if wandb_name is None:
+            wandb_name = 'wandb'
+
+        args.dump_dir = os.path.join(args.dump_dir, wandb_name)
+        # create dump_dir if not exist
+        if not os.path.exists(args.dump_dir):
+            os.makedirs(args.dump_dir)
+
         trainer.train()
     elif MODE(args.mode) == MODE.Test:
         print('Local test')
